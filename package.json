@@ -10,7 +10,8 @@
   },
   "homepage": "git@github.com:mikejensen-gh/map-game",
   "dependencies": {
-    "vue": "^2.5.17"
+    "vue": "^2.5.17",
+    "vue-gh-pages": "^1.18.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.1",

@@ -14,7 +14,7 @@ export default {
     createGoogleMaps () {
       return new Promise((resolve, reject) => {
         let gmap = document.createElement('script')
-        gmap.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyA5vzR_Ej7ccka5ERQeJgGj8Bs7CZ0q_EI'
+        gmap.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VUE_APP_GMAPS_API}`
         gmap.type = 'text/javascript'
         gmap.onload = resolve
         gmap.onerror = reject
