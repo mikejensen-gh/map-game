@@ -1,15 +1,18 @@
-<!-- https://medium.com/@immattjenkins/google-maps-in-plain-vue-6e0fc755f7d0 -->
 <template>
   <div>
     <div id="gameInterface">
-      <div v-if="gameState.status === 'inactive'" @click="startGame">Start game!</div>
-      <div v-if="gameState.status === 'active'">
+      <div v-if="gameStatus === 'inactive'">
+        <div><button  @click="startGame">Start game!</button></div>
+      </div>
+      <div v-if="gameStatus === 'active'">
         <div>Cities found: {{ gameState.citiesCorrectlyGuessed }}</div>
         <div>Kilometers left: {{ gameState.kilometersLeft }}</div>
         <div>Find {{ gameState.cityToGuess.name }}</div>
+        <div><button v-if="mapMarker !== null" @click="guessCityLocation">Confirm guess?</button></div>
       </div>
-      <div v-if="gameState.status === 'gameOver'">
-        Game Over! You found {{ gameState.citiesCorrectlyGuessed }} {{ gameState.citiesCorrectlyGuessed === 1 ? 'city' : 'cities'  }}, good job.
+      <div v-if="gameStatus === 'gameOver'">
+        <div>{{ gameOverMessage }}</div>
+        <div><button @click="startGame">Click to restart</button></div>
       </div>
     </div>
     <div id="gmap-container"></div>
@@ -24,12 +27,9 @@ export default {
     return {
       vueGMap: null,
       
-      gameState: {
-        kilometersLeft: 1500,
-        citiesCorrectlyGuessed: 0,
-        status: 'inactive',
-        cityToGuess: null
-      },
+      gameStatus: 'inactive',
+
+      gameState: {},
 
       cities: [
           {
@@ -78,11 +78,15 @@ export default {
               lng: 8.5016958
           },
       ],
+
+      mapMarker: null,
     }
   },
 
   methods: {
     createGoogleMaps () {
+      // Google Maps + Vue implementation source: https://medium.com/@immattjenkins/google-maps-in-plain-vue-6e0fc755f7d0
+
       return new Promise((resolve, reject) => {
         let gmap = document.createElement('script')
         gmap.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VUE_APP_GMAPS_API}`
@@ -95,7 +99,10 @@ export default {
 
     initGoogleMaps() {
       const options = {
-        center: {lat: 52.37733, lng: 9.7304913},
+        center: {
+          lat: 52.37733,
+          lng: 9.7304913
+        },
         zoom: 6,
 
         mapTypeId: 'terrain', 
@@ -178,12 +185,23 @@ export default {
       this.vueGMap.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('gameInterface'));
 
       this.vueGMap.addListener('click', (e) => {
-        this.guessCityLocation(e);
+        this.addMapMarker(e);
       });
     },
 
     googleMapsFailedToLoad() {
       this.vueGMap = 'Error occurred';
+    },
+
+    addMapMarker(event) {
+      if (this.mapMarker) {
+        this.mapMarker.setMap(null);
+      }
+
+      this.mapMarker = new google.maps.Marker({
+        position: event.latLng,
+        map: this.vueGMap,
+      })
     },
 
     calculateSeparation(target, guess) {
@@ -212,20 +230,33 @@ export default {
     },
 
     startGame() {
-      this.gameState.status = 'active';
-      this.gameState.cityToGuess = this.cities[Math.floor(Math.random() * this.cities.length)];
+      this.gameState = {
+        kilometersLeft: 1500,
+        citiesCorrectlyGuessed: 0,
+      }
+
+      this.gameStatus = 'active';
+      this.selectNextCity();
     },
 
-    guessCityLocation(event) {
-      if (this.gameState.status !== 'active') {
+    selectNextCity() {
+      const previousCity = this.gameState.cityToGuess;
+
+      do {
+        this.gameState.cityToGuess = this.cities[Math.floor(Math.random() * this.cities.length)];
+      } while (previousCity && this.gameState.cityToGuess.name === previousCity.name)
+    },
+
+    guessCityLocation() {
+      if (this.gameStatus !== 'active') {
         return;
       }
 
       const target = this.gameState.cityToGuess;
 
       const guess = {
-        lat: event.latLng.lat(),
-        lng: event.latLng.lng()
+        lat: this.mapMarker.position.lat(),
+        lng: this.mapMarker.position.lng()
       }
 
       const separationDistanceInKm = this.calculateSeparation(target, guess);
@@ -241,22 +272,44 @@ export default {
       }
 
       if (this.gameState.kilometersLeft > 0) {
-        this.gameState.cityToGuess = this.cities[Math.floor(Math.random() * this.cities.length)];
+        this.selectNextCity();
       } else {
-        this.gameState.status = 'gameOver';
+        this.gameStatus = 'gameOver';
       }
     }
   },
 
   mounted() {
-    // Source: https://medium.com/@immattjenkins/google-maps-in-plain-vue-6e0fc755f7d0
-
     this.createGoogleMaps().then(this.initGoogleMaps, this.googleMapsFailedToLoad)
+  },
+
+  computed: {
+    gameOverMessage: function() {
+      const score = this.gameState.citiesCorrectlyGuessed;
+      let message = `Game Over! You found ${score} ${score === 1 ? 'city' : 'cities'  }, `
+
+      switch (true) {
+        case score <= 3: {
+          message += 'better luck next time.';
+          break;
+        }
+
+        case score <= 10: {
+          message += 'not half bad!'
+          break;
+        }
+
+        default: {
+          message += 'nice work!'
+        }
+      }
+
+      return message;
+    }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 #gmap-container {
   height: 100vh;
