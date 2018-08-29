@@ -1,6 +1,17 @@
+<!-- https://medium.com/@immattjenkins/google-maps-in-plain-vue-6e0fc755f7d0 -->
 <template>
   <div>
-    <div id="gameInterface">{{counter}}</div>
+    <div id="gameInterface">
+      <div v-if="gameState.status === 'inactive'" @click="startGame">Start game!</div>
+      <div v-if="gameState.status === 'active'">
+        <div>Cities found: {{ gameState.citiesCorrectlyGuessed }}</div>
+        <div>Kilometers left: {{ gameState.kilometersLeft }}</div>
+        <div>Find {{ gameState.cityToGuess.name }}</div>
+      </div>
+      <div v-if="gameState.status === 'gameOver'">
+        Game Over! You found {{ gameState.citiesCorrectlyGuessed }} {{ gameState.citiesCorrectlyGuessed === 1 ? 'city' : 'cities'  }}, good job.
+      </div>
+    </div>
     <div id="gmap-container"></div>
   </div>
 </template>
@@ -12,7 +23,13 @@ export default {
   data() {
     return {
       vueGMap: null,
-      counter: 0,
+      
+      gameState: {
+        kilometersLeft: 1500,
+        citiesCorrectlyGuessed: 0,
+        status: 'inactive',
+        cityToGuess: null
+      },
 
       cities: [
           {
@@ -133,7 +150,7 @@ export default {
       this.vueGMap = new google.maps.Map(document.getElementById('gmap-container'), options);
 
       this.vueGMap.addListener('click', (e) => {
-        this.calculateSeparation(e);
+        this.guessCityLocation(e);
       });
     },
 
@@ -141,18 +158,10 @@ export default {
       this.vueGMap = 'Error occurred';
     },
 
-    calculateSeparation(event) {
-      const target = {
-        lat: 47.22,
-        lng: 8.33,
-      }
-
-      const guess = {
-        lat: event.latLng.lat(),
-        lng: event.latLng.lng()
-      }
-
+    calculateSeparation(target, guess) {
       try {
+        // Source: http://www.movable-type.co.uk/scripts/latlong.html
+
         function toRadians(valueInDegrees) {
           return valueInDegrees * (Math.PI / 180)
         }
@@ -166,17 +175,54 @@ export default {
         const squareOfHalfOfChordLengthBetweenPoints = (Math.sin(latDiffInRadians/2) * Math.sin(latDiffInRadians/2))
           + (Math.cos(targetLatInRadians) * Math.cos(guessLatInRadians) * Math.sin(lngDiffInRadians/2) * Math.sin(lngDiffInRadians/2));
         const angularDistance = 2 * Math.atan2(Math.sqrt(squareOfHalfOfChordLengthBetweenPoints), Math.sqrt(1-squareOfHalfOfChordLengthBetweenPoints));
-        const separationDistanceInKm = earthRadiusInKm * angularDistance;
-
-        console.log(separationDistanceInKm);
+        
+        return Math.round(earthRadiusInKm * angularDistance); // Distance in KM
       } catch (e) {
-        debugger;
+        console.error('Error calculating distance between two points', e);
+        return null;
+      }
+    },
+
+    startGame() {
+      this.gameState.status = 'active';
+      this.gameState.cityToGuess = this.cities[Math.floor(Math.random() * this.cities.length)];
+    },
+
+    guessCityLocation(event) {
+      if (this.gameState.status !== 'active') {
+        return;
+      }
+
+      const target = this.gameState.cityToGuess;
+
+      const guess = {
+        lat: event.latLng.lat(),
+        lng: event.latLng.lng()
+      }
+
+      const separationDistanceInKm = this.calculateSeparation(target, guess);
+
+      if (separationDistanceInKm === null) {
+        return;
+      }
+
+      if (separationDistanceInKm <= 50) {
+        this.gameState.citiesCorrectlyGuessed++;
+      } else {
+        this.gameState.kilometersLeft -= separationDistanceInKm;
+      }
+
+      if (this.gameState.kilometersLeft > 0) {
+        this.gameState.cityToGuess = this.cities[Math.floor(Math.random() * this.cities.length)];
+      } else {
+        this.gameState.status = 'gameOver';
       }
     }
-    
   },
 
   mounted() {
+    // Source: https://medium.com/@immattjenkins/google-maps-in-plain-vue-6e0fc755f7d0
+
     this.createGoogleMaps().then(this.initGoogleMaps, this.googleMapsFailedToLoad)
   }
 }
