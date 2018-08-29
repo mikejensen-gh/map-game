@@ -1,15 +1,21 @@
 <template>
-  <div id="gmap-container"></div>
+  <div>
+    <div id="gameInterface">{{counter}}</div>
+    <div id="gmap-container"></div>
+  </div>
 </template>
 
 <script>
 export default {
   name: 'MapGame',
+
   data() {
     return {
       vueGMap: null,
+      counter: 0
     }
   },
+
   methods: {
     createGoogleMaps () {
       return new Promise((resolve, reject) => {
@@ -77,12 +83,22 @@ export default {
       };
 
       this.vueGMap = new google.maps.Map(document.getElementById('gmap-container'), options);
+
+      this.vueGMap.addListener('click', (e) => {
+        this.markPosition(e);
+      });
     },
+
     googleMapsFailedToLoad() {
       this.vueGMap = 'Error occurred';
+    },
+
+    markPosition(event) {
+      console.log(event)
     }
     
   },
+
   mounted() {
     this.createGoogleMaps().then(this.initGoogleMaps, this.googleMapsFailedToLoad)
   }
