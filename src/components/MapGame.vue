@@ -85,7 +85,7 @@ export default {
       this.vueGMap = new google.maps.Map(document.getElementById('gmap-container'), options);
 
       this.vueGMap.addListener('click', (e) => {
-        this.markPosition(e);
+        this.calculateSeparation(e);
       });
     },
 
@@ -93,8 +93,37 @@ export default {
       this.vueGMap = 'Error occurred';
     },
 
-    markPosition(event) {
-      console.log(event)
+    calculateSeparation(event) {
+      const target = {
+        lat: 47.22,
+        lng: 8.33,
+      }
+
+      const guess = {
+        lat: event.latLng.lat(),
+        lng: event.latLng.lng()
+      }
+
+      try {
+        function toRadians(valueInDegrees) {
+          return valueInDegrees * (Math.PI / 180)
+        }
+
+        const earthRadiusInKm = 6371;
+        const targetLatInRadians = toRadians(target.lat);
+        const guessLatInRadians = toRadians(guess.lat);
+        const latDiffInRadians = toRadians(guess.lat-target.lat);
+        const lngDiffInRadians = toRadians(target.lng-guess.lng);
+
+        const squareOfHalfOfChordLengthBetweenPoints = (Math.sin(latDiffInRadians/2) * Math.sin(latDiffInRadians/2))
+          + (Math.cos(targetLatInRadians) * Math.cos(guessLatInRadians) * Math.sin(lngDiffInRadians/2) * Math.sin(lngDiffInRadians/2));
+        const angularDistance = 2 * Math.atan2(Math.sqrt(squareOfHalfOfChordLengthBetweenPoints), Math.sqrt(1-squareOfHalfOfChordLengthBetweenPoints));
+        const separationDistanceInKm = earthRadiusInKm * angularDistance;
+
+        console.log(separationDistanceInKm);
+      } catch (e) {
+        debugger;
+      }
     }
     
   },
