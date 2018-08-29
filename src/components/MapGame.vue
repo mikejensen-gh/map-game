@@ -96,18 +96,44 @@ export default {
     initGoogleMaps() {
       const options = {
         center: {lat: 52.37733, lng: 9.7304913},
-        zoom: 5,
+        zoom: 6,
 
-        mapTypeId: 'hybrid',
+        mapTypeId: 'terrain', 
         
         fullscreenControl: false,
         mapTypeControl: false,
         streetViewControl: false,
 
+
+        // https://developers.google.com/maps/documentation/javascript/examples/hiding-features
         styles: [
           {
             featureType: 'administrative',
             elementType: 'labels',
+            stylers: [
+              {visibility: 'off'}
+            ]
+          },
+          {
+            featureType: 'administrative.province',
+            stylers: [
+              {visibility: 'off'}
+            ]
+          },
+          {
+            featureType: 'administrative.locality',
+            stylers: [
+              {visibility: 'off'}
+            ]
+          },
+          {
+            featureType: 'administrative.neighborhood',
+            stylers: [
+              {visibility: 'off'}
+            ]
+          },
+          {
+            featureType: 'administrative.land_parcel',
             stylers: [
               {visibility: 'off'}
             ]
