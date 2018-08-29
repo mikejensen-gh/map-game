@@ -96,9 +96,9 @@ export default {
     initGoogleMaps() {
       const options = {
         center: {lat: 52.37733, lng: 9.7304913},
-        zoom: 6,
+        zoom: 5,
 
-        mapTypeId: 'terrain',
+        mapTypeId: 'hybrid',
         
         fullscreenControl: false,
         mapTypeControl: false,
@@ -148,6 +148,8 @@ export default {
       };
 
       this.vueGMap = new google.maps.Map(document.getElementById('gmap-container'), options);
+
+      this.vueGMap.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('gameInterface'));
 
       this.vueGMap.addListener('click', (e) => {
         this.guessCityLocation(e);
@@ -230,33 +232,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-body {
-  background: #20262E;
-  padding: 20px;
-  font-family: Helvetica;
-}
-
-#app {
-  background: #fff;
-  border-radius: 4px;
-  padding: 20px;
-  transition: all 0.2s;
-}
-
-li {
-  margin: 8px 0;
-}
-
-h2 {
-  font-weight: bold;
-  margin-bottom: 15px;
-}
-
-del {
-  color: rgba(0, 0, 0, 0.3);
-}
-
 #gmap-container {
   height: 100vh;
+}
+
+#gameInterface {
+  background: #FFF;
+  padding: 10px;
+  margin-top: 5px;
+  box-shadow: 0px 0px 2px rgba(0,0,0,0.2);
 }
 </style>
