@@ -12,7 +12,55 @@ export default {
   data() {
     return {
       vueGMap: null,
-      counter: 0
+      counter: 0,
+
+      cities: [
+          {
+              name: "Amsterdam",
+              lat: 52.3546274,
+              lng: 4.828584
+          },
+          {
+              name: "Berlin",
+              lat: 52.5067614,
+              lng: 13.2846515
+          },
+          {
+              name: "London",
+              lat: 51.5285582,
+              lng: -0.241679
+          },
+          {
+              name: "Madrid",
+              lat: 40.4379332,
+              lng: -3.749576
+          },
+          {
+              name: "Oslo",
+              lat: 59.8938364,
+              lng: 10.7150777
+          },
+          {
+              name: "Paris",
+              lat: 48.8588536,
+              lng: 2.3120407
+          },
+          {
+              name: "Rome",
+              lat: 41.909986,
+              lng: 12.3959165
+          },
+          {
+              name: "Vienna",
+              lat: 48.2206636,
+              lng: 16.3100208
+          },
+          {
+              name: "Zurich",
+              lat: 47.3774497,
+              lng: 8.5016958
+          },
+      ],
     }
   },
 
