@@ -1,20 +1,22 @@
 <template>
   <div>
-    <div id="gameInterface">
-      <div v-if="gameStatus === 'inactive'">
-        <div><button  @click="startGame">Start game!</button></div>
-      </div>
-      <div v-if="gameStatus === 'active'">
-        <div>Cities found: {{ gameState.citiesCorrectlyGuessed }}</div>
-        <div>Kilometers left: {{ gameState.kilometersLeft }}</div>
-        <div>Find {{ gameState.cityToGuess.name }}</div>
-        <div><button v-if="mapMarker !== null" @click="guessCityLocation">Confirm guess?</button></div>
-      </div>
-      <div v-if="gameStatus === 'gameOver'">
-        <div>{{ gameOverMessage }}</div>
-        <div><button @click="startGame">Click to restart</button></div>
-      </div>
-    </div>
+    <v-card id="gameInterface">
+      <v-layout>
+        <v-flex>
+          <v-card-title primary-title>
+            <div>
+              <h3 class="headline mb-2">Can you find the city?</h3>
+              <div class="subheading" v-html="gameInstructions"></div>
+            </div>
+          </v-card-title>
+          <v-card-actions>
+            <v-btn v-if="gameStatus === 'inactive'" @click="startGame">Start game!</v-btn>
+            <v-btn v-if="gameStatus === 'active' && mapMarker !== null" @click="guessCityLocation">Confirm guess?</v-btn>
+            <v-btn v-if="gameStatus === 'gameOver'" @click="startGame">Click to restart</v-btn>
+          </v-card-actions>
+        </v-flex>
+      </v-layout>
+    </v-card>
     <div id="gmap-container"></div>
   </div>
 </template>
@@ -305,6 +307,49 @@ export default {
       }
 
       return message;
+    },
+
+    gameInstructions: function() {
+      let message = '';
+      const score = this.gameState.citiesCorrectlyGuessed;
+      
+      if (this.gameStatus === 'inactive') {
+        message = `
+          In this game, you need to try and guess where each city is.<br>
+          If your guess is more than 50km away, you'll lose points.<br>
+          Reach 0, and the game is over. Have fun!
+        `;
+      }
+
+      if (this.gameStatus === 'active') {
+        message = `
+          Cities found: ${this.gameState.citiesCorrectlyGuessed}<br>
+          Kilometers left: ${this.gameState.kilometersLeft}<br>
+          Find ${this.gameState.cityToGuess.name}
+        `
+      }
+
+      if (this.gameStatus === 'gameOver') {
+        message = `Game Over! You found ${score} ${score === 1 ? 'city' : 'cities'  }, `
+
+        switch (true) {
+          case score <= 3: {
+            message += 'better luck next time.';
+            break;
+          }
+
+          case score <= 10: {
+            message += 'not half bad!'
+            break;
+          }
+
+          default: {
+            message += 'nice work!'
+          }
+        }
+      }
+
+      return message;
     }
   }
 }
@@ -316,9 +361,11 @@ export default {
 }
 
 #gameInterface {
-  background: #FFF;
+  z-index: 1;
+  margin-top: 10px;
+}
+  /*background: #FFF;
   padding: 10px;
   margin-top: 5px;
-  box-shadow: 0px 0px 2px rgba(0,0,0,0.2);
-}
+  box-shadow: 0px 0px 2px rgba(0,0,0,0.2);*/
 </style>

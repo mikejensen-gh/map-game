@@ -1,6 +1,10 @@
 <template>
   <div id="app">
-    <MapGame/>
+      <v-app>
+        <v-content>
+          <MapGame/>
+        </v-content>
+      </v-app>
   </div>
 </template>
 
@@ -23,10 +27,7 @@ html, body {
 }
 
 #app {
-  background: #20262E;
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  text-align: center;
-
+  font-size: 14px;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
