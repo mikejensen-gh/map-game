@@ -1,16 +1,16 @@
 <template>
   <div>
-    <v-card id="gameInterface">
+    <v-card id="gameInterface" dark>
       <v-layout>
         <v-flex>
           <v-card-title primary-title>
             <div>
-              <h3 class="headline mb-2">Can you find the city?</h3>
+              <h3 class="headline mb-2">{{ headingText }}</h3>
               <div class="subheading" v-html="gameInstructions()"></div>
             </div>
           </v-card-title>
           <v-card-actions>
-            <v-btn v-if="gameStatus === 'inactive'" @click="startGame">Start game!</v-btn>
+            <v-btn v-if="gameStatus === 'inactive'" @click="startGame" flat class="indigo darken-1 mx-auto">Start game!</v-btn>
           </v-card-actions>
         </v-flex>
       </v-layout>
@@ -258,7 +258,9 @@ export default {
           },
           map: this.vueGMap,
           animation: google.maps.Animation.BOUNCE
-        })
+        });
+
+        this.vueGMap.panTo(this.targetMarker.getPosition());
       }
 
       this.guessConfirmed = true;
@@ -295,7 +297,11 @@ export default {
 
     nextRound() {
       this.guessMarker.setMap(null);
-      this.targetMarker.setMap(null);
+
+      if (this.targetMarker) {
+        this.targetMarker.setMap(null);
+      }
+
       this.showGuessModal = false;
       this.selectNextCity();
     },
@@ -314,22 +320,22 @@ export default {
       
       if (this.gameStatus === 'inactive') {
         message = `
-          In this game, you need to try and guess where each city is.<br>
+          Can you find Europe's capital cities?<br>
           If your guess is more than 50km away, you'll lose points.<br>
-          Reach 0, and the game is over. Have fun!
+          When you score hits 0, the game is over. Good luck!
         `;
       }
 
       if (this.gameStatus === 'active') {
         message = `
-          Cities found: ${this.gameState.citiesCorrectlyGuessed}<br>
-          Kilometers left: ${this.gameState.kilometersLeft}<br>
-          Find ${this.gameState.cityToGuess.name}
+          Cities found: <span class="font-weight-bold">${this.gameState.citiesCorrectlyGuessed}</span><br>
+          Kilometers left: <span class="font-weight-bold">${this.gameState.kilometersLeft}</span><br>
+          Find <span class="font-weight-bold">${this.gameState.cityToGuess.name}!</span>
         `
       }
 
       if (this.gameStatus === 'gameOver') {
-        message = `Game Over! You found ${score} ${score === 1 ? 'city' : 'cities'  }, `
+        message = `You found ${score} ${score === 1 ? 'city' : 'cities'  }, `
 
         switch (true) {
           case score <= 3: {
@@ -357,7 +363,13 @@ export default {
   },
 
   computed: {
-
+    headingText: function() {
+      if (this.gameStatus === 'gameOver') {
+        return 'Game over man!'
+      } else {
+        return 'Can you find the city?'
+      }
+    }
   }
 }
 </script>
@@ -371,8 +383,4 @@ export default {
   z-index: 1;
   margin-top: 10px;
 }
-  /*background: #FFF;
-  padding: 10px;
-  margin-top: 5px;
-  box-shadow: 0px 0px 2px rgba(0,0,0,0.2);*/
 </style>
