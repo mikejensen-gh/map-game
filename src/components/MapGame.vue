@@ -120,11 +120,11 @@ export default {
         zoom: 6,
 
         mapTypeId: 'terrain',
+        gestureHandling: 'greedy',
 
         fullscreenControl: false,
         mapTypeControl: false,
         streetViewControl: false,
-
 
         // https://developers.google.com/maps/documentation/javascript/examples/hiding-features
         styles: [
