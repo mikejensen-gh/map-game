@@ -114,8 +114,8 @@ export default {
         },
         zoom: 6,
 
-        mapTypeId: 'terrain', 
-        
+        mapTypeId: 'terrain',
+
         fullscreenControl: false,
         mapTypeControl: false,
         streetViewControl: false,
@@ -287,7 +287,7 @@ export default {
         const squareOfHalfOfChordLengthBetweenPoints = (Math.sin(latDiffInRadians/2) * Math.sin(latDiffInRadians/2))
           + (Math.cos(targetLatInRadians) * Math.cos(guessLatInRadians) * Math.sin(lngDiffInRadians/2) * Math.sin(lngDiffInRadians/2));
         const angularDistance = 2 * Math.atan2(Math.sqrt(squareOfHalfOfChordLengthBetweenPoints), Math.sqrt(1-squareOfHalfOfChordLengthBetweenPoints));
-        
+
         return Math.round(earthRadiusInKm * angularDistance); // Distance in KM
       } catch (e) {
         console.error('Error calculating distance between two points', e);
@@ -317,12 +317,12 @@ export default {
     gameInstructions: function() {
       let message = '';
       const score = this.gameState.citiesCorrectlyGuessed;
-      
+
       if (this.gameStatus === 'inactive') {
         message = `
           Can you find Europe's capital cities?<br>
           If your guess is more than 50km away, you'll lose points.<br>
-          When you score hits 0, the game is over. Good luck!
+          When your score hits 0, the game is over. Good luck!
         `;
       }
 
