@@ -13,6 +13,7 @@ import MapGame from './components/MapGame.vue'
 
 export default {
   name: 'app',
+
   components: {
     MapGame
   }

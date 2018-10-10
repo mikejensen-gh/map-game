@@ -1,31 +1,233 @@
 <template>
   <div>
-    <v-card id="gameInstructions">
-      <v-card-title primary-title>
-        <div>
-          <h3 class="headline mb-2" v-html="headingText()"></h3>
-          <div class="subheading" v-html="gameInstructions()"></div>
-        </div>
-      </v-card-title>
-      <v-card-actions>
-        <v-btn v-if="!gameActive" @click="startGame" class="mx-auto" color="primary">Start game!</v-btn>
-      </v-card-actions>
-    </v-card>
-    <v-snackbar id="gameSnackbar" v-model="showGuessModal" bottom :timeout="0">
-      {{ confirmGuessText }}
+    <GameInstructions
+      :gameActive="gameActive"
+      :gameOver="gameOver"
+      :gameState="gameState"
 
-      <v-btn v-if="!guessConfirmed" color="pink" flat @click="confirmGuess">Confirm</v-btn>
-      <v-btn v-if="guessConfirmed && gameActive && !gameOver" color="pink" flat @click="nextRound">Continue</v-btn>
-      <v-btn v-if="gameOver" color="pink" flat @click="startGame">Start over</v-btn>
+      @startGame="startGame()"
 
-    </v-snackbar>
+    ></GameInstructions>
+    <GuessModal
+      :confirmGuessText="confirmGuessText"
+      :showGuessModal="showGuessModal"
+      :guessConfirmed="guessConfirmed"
+      :gameActive="gameActive"
+      :gameOver="gameOver"
+
+      @confirmGuess="confirmGuess()"
+      @nextRound="nextRound()"
+      @startGame="startGame()"
+    >
+    </GuessModal>
     <div id="gmap-container"></div>
   </div>
 </template>
 
 <script>
+import GameInstructions from './GameInstructions.vue'
+import GuessModal from './GuessModal.vue'
+
+const cities = [
+  {
+    name: "Amsterdam",
+    lat: 52.3546274,
+    lng: 4.828584
+  },
+  {
+    name: "Athens",
+    lat: 37.990832,
+    lng: 23.70332
+  },
+  {
+    name: "Belgrade",
+    lat: 44.8151597,
+    lng: 20.2825159
+  },
+  {
+    name: "Berlin",
+    lat: 52.5067614,
+    lng: 13.2846515
+  },
+  {
+    name: "Bratislava",
+    lat: 48.1356952,
+    lng: 16.9758363
+  },
+  {
+    name: "Brussels",
+    lat: 50.8549541,
+    lng: 4.3053509
+  },
+  {
+    name: "Bucharest",
+    lat: 44.4378043,
+    lng: 26.0245983
+  },
+  {
+    name: "Budapest",
+    lat: 47.4811282,
+    lng: 18.9902222
+  },
+  {
+    name: "Chisinau",
+    lat: 46.9998477,
+    lng: 28.7881374
+  },
+  {
+    name: "Copenhagen",
+    lat: 55.6712474,
+    lng: 12.523785
+  },
+  {
+    name: "Dublin",
+    lat: 53.3242996,
+    lng: -6.3157431
+  },
+  {
+    name: "Helsinki",
+    lat: 60.1098679,
+    lng: 24.738515
+  },
+  {
+    name: "Istanbul",
+    lat: 41.0052367,
+    lng: 28.872098
+  },
+  {
+    name: "Lisabon",
+    lat: 38.7436214,
+    lng: -9.1952225
+  },
+  {
+    name: "Ljubljana",
+    lat: 46.066096,
+    lng: 14.4620599
+  },
+  {
+    name: "London",
+    lat: 51.5285582,
+    lng: -0.241679
+  },
+  {
+    name: "Kyiv",
+    lat: 50.4019514,
+    lng: 30.39261
+  },
+  {
+    name: "Madrid",
+    lat: 40.4379332,
+    lng: -3.749576
+  },
+  {
+    name: "Minsk",
+    lat: 53.8838069,
+    lng: 27.5796489
+  },
+  {
+    name: "Moscow",
+    lat: 55.5807482,
+    lng: 36.8251602
+  },
+  {
+    name: "Oslo",
+    lat: 59.8938364,
+    lng: 10.7150777
+  },
+  {
+    name: "Paris",
+    lat: 48.8588536,
+    lng: 2.3120407
+  },
+  {
+    name: "Podgorica",
+    lat: 42.4319954,
+    lng: 19.2208596
+  },
+  {
+    name: "Prague",
+    lat: 50.0595854,
+    lng: 14.3255434
+  },
+  {
+    name: "Prishtina",
+    lat: 42.6663748,
+    lng: 21.123708
+  },
+  {
+    name: "Riga",
+    lat: 56.9713962,
+    lng: 23.9890827
+  },
+  {
+    name: "Rome",
+    lat: 41.909986,
+    lng: 12.3959165
+  },
+  {
+    name: "Sarajevo",
+    lat: 43.8937019,
+    lng: 18.3129523
+  },
+  {
+    name: "Skopje",
+    lat: 41.9990849,
+    lng: 21.389871
+  },
+  {
+    name: "Sofia",
+    lat: 42.6388078,
+    lng: 23.1838654
+  },
+  {
+    name: "Stockholm",
+    lat: 59.3260668,
+    lng: 17.841973
+  },
+  {
+    name: "Tallinn",
+    lat: 59.4716181,
+    lng: 24.598162
+  },
+  {
+    name: "Tirana",
+    lat: 41.3309769,
+    lng: 19.7828039
+  },
+  {
+    name: "Vienna",
+    lat: 48.2206636,
+    lng: 16.3100208
+  },
+  {
+    name: "Vilnius",
+    lat: 54.7000902,
+    lng: 25.1128521
+  },
+  {
+    name: "Warsaw",
+    lat: 52.232855,
+    lng: 20.9211138
+  },
+  {
+    name: "Zagreb",
+    lat: 45.8401746,
+    lng: 15.8942924
+  },
+  {
+    name: "Zurich",
+    lat: 47.3774497,
+    lng: 8.5016958
+  },
+];
+
 export default {
   name: 'MapGame',
+
+  components: {
+    GameInstructions,
+    GuessModal
+  },
 
   data() {
     return {
@@ -34,7 +236,15 @@ export default {
       gameActive: false,
       gameOver: false,
 
-      gameState: {},
+      gameState: {
+        kilometersLeft: 1500,
+        citiesCorrectlyGuessed: 0,
+        cityToGuess: {
+          name: '',
+          lat: 0,
+          lng: 0
+        }
+      },
 
       confirmGuessText: null,
       guessConfirmed: false,
@@ -42,199 +252,6 @@ export default {
 
       guessMarker: null,
       targetMarker: null,
-
-      cities: [
-        {
-          name: "Amsterdam",
-          lat: 52.3546274,
-          lng: 4.828584
-        },
-        {
-          name: "Athens",
-          lat: 37.990832,
-          lng: 23.70332
-        },
-        {
-          name: "Belgrade",
-          lat: 44.8151597,
-          lng: 20.2825159
-        },
-        {
-          name: "Berlin",
-          lat: 52.5067614,
-          lng: 13.2846515
-        },
-        {
-          name: "Bratislava",
-          lat: 48.1356952,
-          lng: 16.9758363
-        },
-        {
-          name: "Brussels",
-          lat: 50.8549541,
-          lng: 4.3053509
-        },
-        {
-          name: "Bucharest",
-          lat: 44.4378043,
-          lng: 26.0245983
-        },
-        {
-          name: "Budapest",
-          lat: 47.4811282,
-          lng: 18.9902222
-        },
-        {
-          name: "Chisinau",
-          lat: 46.9998477,
-          lng: 28.7881374
-        },
-        {
-          name: "Copenhagen",
-          lat: 55.6712474,
-          lng: 12.523785
-        },
-        {
-          name: "Dublin",
-          lat: 53.3242996,
-          lng: -6.3157431
-        },
-        {
-          name: "Helsinki",
-          lat: 60.1098679,
-          lng: 24.738515
-        },
-        {
-          name: "Istanbul",
-          lat: 41.0052367,
-          lng: 28.872098
-        },
-        {
-          name: "Lisabon",
-          lat: 38.7436214,
-          lng: -9.1952225
-        },
-        {
-          name: "Ljubljana",
-          lat: 46.066096,
-          lng: 14.4620599
-        },
-        {
-          name: "London",
-          lat: 51.5285582,
-          lng: -0.241679
-        },
-        {
-          name: "Kyiv",
-          lat: 50.4019514,
-          lng: 30.39261
-        },
-        {
-          name: "Madrid",
-          lat: 40.4379332,
-          lng: -3.749576
-        },
-        {
-          name: "Minsk",
-          lat: 53.8838069,
-          lng: 27.5796489
-        },
-        {
-          name: "Moscow",
-          lat: 55.5807482,
-          lng: 36.8251602
-        },
-        {
-          name: "Oslo",
-          lat: 59.8938364,
-          lng: 10.7150777
-        },
-        {
-          name: "Paris",
-          lat: 48.8588536,
-          lng: 2.3120407
-        },
-        {
-          name: "Podgorica",
-          lat: 42.4319954,
-          lng: 19.2208596
-        },
-        {
-          name: "Prague",
-          lat: 50.0595854,
-          lng: 14.3255434
-        },
-        {
-          name: "Prishtina",
-          lat: 42.6663748,
-          lng: 21.123708
-        },
-        {
-          name: "Riga",
-          lat: 56.9713962,
-          lng: 23.9890827
-        },
-        {
-          name: "Rome",
-          lat: 41.909986,
-          lng: 12.3959165
-        },
-        {
-          name: "Sarajevo",
-          lat: 43.8937019,
-          lng: 18.3129523
-        },
-        {
-          name: "Skopje",
-          lat: 41.9990849,
-          lng: 21.389871
-        },
-        {
-          name: "Sofia",
-          lat: 42.6388078,
-          lng: 23.1838654
-        },
-        {
-          name: "Stockholm",
-          lat: 59.3260668,
-          lng: 17.841973
-        },
-        {
-          name: "Tallinn",
-          lat: 59.4716181,
-          lng: 24.598162
-        },
-        {
-          name: "Tirana",
-          lat: 41.3309769,
-          lng: 19.7828039
-        },
-        {
-          name: "Vienna",
-          lat: 48.2206636,
-          lng: 16.3100208
-        },
-        {
-          name: "Vilnius",
-          lat: 54.7000902,
-          lng: 25.1128521
-        },
-        {
-          name: "Warsaw",
-          lat: 52.232855,
-          lng: 20.9211138
-        },
-        {
-          name: "Zagreb",
-          lat: 45.8401746,
-          lng: 15.8942924
-        },
-        {
-          name: "Zurich",
-          lat: 47.3774497,
-          lng: 8.5016958
-        },
-      ],
     }
   },
 
@@ -354,6 +371,11 @@ export default {
       this.gameState = {
         kilometersLeft: 1500,
         citiesCorrectlyGuessed: 0,
+        cityToGuess: {
+          name: '',
+          lat: 0,
+          lng: 0
+        }
       }
 
       this.gameActive = true;
@@ -465,56 +487,9 @@ export default {
       const previousCity = this.gameState.cityToGuess;
 
       do {
-        this.gameState.cityToGuess = this.cities[Math.floor(Math.random() * this.cities.length)];
+        this.gameState.cityToGuess = cities[Math.floor(Math.random() * cities.length)];
       } while (previousCity && this.gameState.cityToGuess.name === previousCity.name)
     },
-
-    gameInstructions: function() {
-      let message = '';
-      const score = this.gameState.citiesCorrectlyGuessed;
-
-      if (!this.gameActive) {
-        message = `
-         Try to find the cities - guesses <b>50km or closer</b> are counted as correct. Otherwise you'll lose points; when your score hits 0, the game is over. Good luck!
-        `;
-      } else if (this.gameOver) {
-        message = `You found ${score} ${score === 1 ? 'city' : 'cities'  }, `
-
-        switch (true) {
-          case score <= 3: {
-            message += 'better luck next time.';
-            break;
-          }
-
-          case score <= 10: {
-            message += 'not half bad!'
-            break;
-          }
-
-          default: {
-            message += 'nice work!'
-          }
-        }
-      } else {
-        message = `
-          Cities found: <span class="font-weight-bold">${this.gameState.citiesCorrectlyGuessed}</span><br>
-          Kilometers left: <span class="font-weight-bold">${this.gameState.kilometersLeft}</span><br>
-        `
-      }
-
-      return message;
-
-    },
-
-    headingText: function() {
-      if (this.gameOver) {
-        return 'Game over!'
-      } else if (this.gameState.cityToGuess) {
-        return `Can you find... <b>${this.gameState.cityToGuess.name}</b>?`
-      } else {
-        return 'Test your knowledge!'
-      }
-    }
   },
 
   mounted() {
@@ -526,19 +501,5 @@ export default {
 <style scoped>
 #gmap-container {
   height: 100vh;
-}
-
-#gameInstructions {
-  position: fixed;
-  z-index: 1;
-  margin: 5px auto 0;
-  left: 0;
-  right: 0;
-
-  max-width: 500px;
-}
-
-#gameSnackbar {
-  z-index: 1;
 }
 </style>
