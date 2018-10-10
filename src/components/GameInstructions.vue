@@ -64,7 +64,7 @@ export default {
     headingText: function() {
       if (this.gameOver) {
         return 'Game over!'
-      } else if (this.gameState.cityToGuess) {
+      } else if (this.gameState.cityToGuess.name) {
         return `Can you find... <b>${this.gameState.cityToGuess.name}</b>?`
       } else {
         return 'Test your knowledge!'

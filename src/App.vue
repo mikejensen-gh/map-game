@@ -32,6 +32,8 @@
 </template>
 
 <script>
+/* global google */
+
 import GameInstructions from './components/GameInstructions.vue'
 import GuessModal from './components/GuessModal.vue'
 import Map from './components/Map.vue'
@@ -342,19 +344,19 @@ export default {
       }
     },
 
+    toRadians(valueInDegrees) {
+      return valueInDegrees * (Math.PI / 180)
+    },
+
     getGuessDistance(target, guess) {
       try {
         // Source: http://www.movable-type.co.uk/scripts/latlong.html
 
-        function toRadians(valueInDegrees) {
-          return valueInDegrees * (Math.PI / 180)
-        }
-
         const earthRadiusInKm = 6371;
-        const targetLatInRadians = toRadians(target.lat);
-        const guessLatInRadians = toRadians(guess.lat);
-        const latDiffInRadians = toRadians(guess.lat-target.lat);
-        const lngDiffInRadians = toRadians(target.lng-guess.lng);
+        const targetLatInRadians = this.toRadians(target.lat);
+        const guessLatInRadians = this.toRadians(guess.lat);
+        const latDiffInRadians = this.toRadians(guess.lat-target.lat);
+        const lngDiffInRadians = this.toRadians(target.lng-guess.lng);
 
         const squareOfHalfOfChordLengthBetweenPoints = (Math.sin(latDiffInRadians/2) * Math.sin(latDiffInRadians/2))
           + (Math.cos(targetLatInRadians) * Math.cos(guessLatInRadians) * Math.sin(lngDiffInRadians/2) * Math.sin(lngDiffInRadians/2));

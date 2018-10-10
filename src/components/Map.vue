@@ -1,8 +1,10 @@
 <template>
-<div id="gmap-container"></div>
+<div id="mapContainer"></div>
 </template>
 
 <script>
+/* global google */
+
 const mapOptions = {
   center: {
     lat: 52.37733,
@@ -103,7 +105,7 @@ export default {
     },
 
     initGoogleMaps() {
-      const map = new google.maps.Map(document.getElementById('gmap-container'), mapOptions);
+      const map = new google.maps.Map(document.getElementById('mapContainer'), mapOptions);
 
       map.addListener('click', (e) => {
         this.$emit('clickHandler', e);
@@ -126,7 +128,7 @@ export default {
 </script>
 
 <style scoped>
-#gmap-container {
+#mapContainer {
   height: 100vh;
 }
 </style>
