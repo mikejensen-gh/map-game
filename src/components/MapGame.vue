@@ -1,20 +1,16 @@
 <template>
   <div>
-    <v-layout id="gameInterface">
-      <v-flex>
-        <v-card class="mx-auto">
-          <v-card-title primary-title>
-            <div>
-              <h3 class="headline mb-2">{{ headingText }}</h3>
-              <div class="subheading" v-html="gameInstructions()"></div>
-            </div>
-          </v-card-title>
-          <v-card-actions>
-            <v-btn v-if="!gameActive" @click="startGame" class="mx-auto" color="primary">Start game!</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-flex>
-    </v-layout>
+    <v-card id="gameInterface" max-width="300">
+      <v-card-title primary-title>
+        <div>
+          <h3 class="headline mb-2">{{ headingText }}</h3>
+          <div class="subheading" v-html="gameInstructions()"></div>
+        </div>
+      </v-card-title>
+      <v-card-actions>
+        <v-btn v-if="!gameActive" @click="startGame" class="mx-auto" color="primary">Start game!</v-btn>
+      </v-card-actions>
+    </v-card>
     <v-snackbar id="gameSnackbar" v-model="showGuessModal" bottom :timeout="0">
       {{ confirmGuessText }}
 
@@ -195,8 +191,6 @@ export default {
       };
 
       this.vueGMap = new google.maps.Map(document.getElementById('gmap-container'), options);
-
-      this.vueGMap.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('gameInterface'));
 
       this.vueGMap.addListener('click', (e) => {
         if (this.guessConfirmed) {
@@ -392,8 +386,13 @@ export default {
 }
 
 #gameInterface {
+  position: fixed;
   z-index: 1;
-  margin-top: 10px;
+  margin: 5px auto 0;
+  left: 0;
+  right: 0;
+
+  max-width: 500px;
 }
 
 #gameSnackbar {
