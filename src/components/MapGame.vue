@@ -16,7 +16,7 @@
           </v-card-actions>
         </v-flex>
       </v-layout>
-      <v-snackbar v-model="showGuessModal" bottom :timeout="0">
+      <v-snackbar id="gameSnackbar" v-model="showGuessModal" bottom :timeout="0">
         {{ confirmGuessText }}
 
         <v-btn v-if="!guessConfirmed" color="pink" flat @click="confirmGuess">Confirm</v-btn>
@@ -272,6 +272,10 @@ export default {
         });
 
         this.vueGMap.panTo(this.targetMarker.getPosition());
+
+        setTimeout(() => {
+          this.targetMarker.setAnimation(null);
+        }, 2000);
       }
 
       this.guessConfirmed = true;
@@ -392,5 +396,9 @@ export default {
 #gameInterface {
   z-index: 1;
   margin-top: 10px;
+}
+
+#gameSnackbar {
+  z-index: 1;
 }
 </style>
