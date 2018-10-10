@@ -10,15 +10,19 @@
             </div>
           </v-card-title>
           <v-card-actions>
+
             <v-btn v-if="!gameActive" @click="startGame" flat class="indigo mx-auto">Start game!</v-btn>
+
           </v-card-actions>
         </v-flex>
       </v-layout>
       <v-snackbar v-model="showGuessModal" bottom :timeout="0">
         {{ confirmGuessText }}
+
         <v-btn v-if="!guessConfirmed" color="pink" flat @click="confirmGuess">Confirm</v-btn>
-        <v-btn v-if="guessConfirmed && gameActive" color="pink" flat @click="nextRound">Continue</v-btn>
-        <v-btn v-if="gameOver" color="pink" flat @click="startGame">Try again!</v-btn>
+        <v-btn v-if="guessConfirmed && gameActive && !gameOver" color="pink" flat @click="nextRound">Continue</v-btn>
+        <v-btn v-if="gameOver" color="pink" flat @click="startGame">Start over</v-btn>
+
       </v-snackbar>
     </v-card>
     <div id="gmap-container"></div>
@@ -197,6 +201,10 @@ export default {
       this.vueGMap.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('gameInterface'));
 
       this.vueGMap.addListener('click', (e) => {
+        if (this.guessConfirmed) {
+          return;
+        }
+
         this.showConfirmGuessModal(e);
       });
     },
@@ -212,7 +220,8 @@ export default {
       }
 
       this.gameActive = true;
-      this.selectNextCity();
+      this.gameOver = false;
+      this.nextRound();
     },
 
     showConfirmGuessModal(event) {
@@ -220,7 +229,6 @@ export default {
         this.guessMarker.setMap(null);
       }
 
-      this.guessConfirmed = false;
       this.confirmGuessText = 'Confirm guess?';
       this.showGuessModal = true;
 
@@ -299,12 +307,15 @@ export default {
     },
 
     nextRound() {
-      this.guessMarker.setMap(null);
+      if (this.guessMarker) {
+        this.guessMarker.setMap(null);
+      }
 
       if (this.targetMarker) {
         this.targetMarker.setMap(null);
       }
 
+      this.guessConfirmed = false;
       this.showGuessModal = false;
       this.selectNextCity();
     },
