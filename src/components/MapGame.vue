@@ -1,8 +1,8 @@
 <template>
   <div>
-    <v-card id="gameInterface">
-      <v-layout>
-        <v-flex>
+    <v-layout id="gameInterface">
+      <v-flex>
+        <v-card class="mx-auto">
           <v-card-title primary-title>
             <div>
               <h3 class="headline mb-2">{{ headingText }}</h3>
@@ -10,21 +10,19 @@
             </div>
           </v-card-title>
           <v-card-actions>
-
-            <v-btn v-if="!gameActive" @click="startGame" flat class="indigo mx-auto">Start game!</v-btn>
-
+            <v-btn v-if="!gameActive" @click="startGame" class="mx-auto" color="primary">Start game!</v-btn>
           </v-card-actions>
-        </v-flex>
-      </v-layout>
-      <v-snackbar id="gameSnackbar" v-model="showGuessModal" bottom :timeout="0">
-        {{ confirmGuessText }}
+        </v-card>
+      </v-flex>
+    </v-layout>
+    <v-snackbar id="gameSnackbar" v-model="showGuessModal" bottom :timeout="0">
+      {{ confirmGuessText }}
 
-        <v-btn v-if="!guessConfirmed" color="pink" flat @click="confirmGuess">Confirm</v-btn>
-        <v-btn v-if="guessConfirmed && gameActive && !gameOver" color="pink" flat @click="nextRound">Continue</v-btn>
-        <v-btn v-if="gameOver" color="pink" flat @click="startGame">Start over</v-btn>
+      <v-btn v-if="!guessConfirmed" color="pink" flat @click="confirmGuess">Confirm</v-btn>
+      <v-btn v-if="guessConfirmed && gameActive && !gameOver" color="pink" flat @click="nextRound">Continue</v-btn>
+      <v-btn v-if="gameOver" color="pink" flat @click="startGame">Start over</v-btn>
 
-      </v-snackbar>
-    </v-card>
+    </v-snackbar>
     <div id="gmap-container"></div>
   </div>
 </template>
