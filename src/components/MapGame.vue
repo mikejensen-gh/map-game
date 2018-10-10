@@ -6,8 +6,8 @@
       :gameState="gameState"
 
       @startGame="startGame()"
-
     ></GameInstructions>
+
     <GuessModal
       :confirmGuessText="confirmGuessText"
       :showGuessModal="showGuessModal"
@@ -18,8 +18,8 @@
       @confirmGuess="confirmGuess()"
       @nextRound="nextRound()"
       @startGame="startGame()"
-    >
-    </GuessModal>
+    ></GuessModal>
+
     <div id="gmap-container"></div>
   </div>
 </template>
