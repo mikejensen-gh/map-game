@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card id="gameInterface" dark>
+    <v-card id="gameInterface">
       <v-layout>
         <v-flex>
           <v-card-title primary-title>
@@ -10,15 +10,15 @@
             </div>
           </v-card-title>
           <v-card-actions>
-            <v-btn v-if="gameStatus === 'inactive'" @click="startGame" flat class="indigo darken-1 mx-auto">Start game!</v-btn>
+            <v-btn v-if="!gameActive" @click="startGame" flat class="indigo mx-auto">Start game!</v-btn>
           </v-card-actions>
         </v-flex>
       </v-layout>
       <v-snackbar v-model="showGuessModal" bottom :timeout="0">
         {{ confirmGuessText }}
         <v-btn v-if="!guessConfirmed" color="pink" flat @click="confirmGuess">Confirm</v-btn>
-        <v-btn v-if="guessConfirmed && gameStatus === 'active'" color="pink" flat @click="nextRound">Continue</v-btn>
-        <v-btn v-if="gameStatus === 'gameOver'" color="pink" flat @click="startGame">Try again!</v-btn>
+        <v-btn v-if="guessConfirmed && gameActive" color="pink" flat @click="nextRound">Continue</v-btn>
+        <v-btn v-if="gameOver" color="pink" flat @click="startGame">Try again!</v-btn>
       </v-snackbar>
     </v-card>
     <div id="gmap-container"></div>
@@ -32,7 +32,10 @@ export default {
   data() {
     return {
       vueGMap: null,
-      gameStatus: 'inactive',
+
+      gameActive: false,
+      gameOver: false,
+
       gameState: {},
 
       confirmGuessText: null,
@@ -208,7 +211,7 @@ export default {
         citiesCorrectlyGuessed: 0,
       }
 
-      this.gameStatus = 'active';
+      this.gameActive = true;
       this.selectNextCity();
     },
 
@@ -228,7 +231,7 @@ export default {
     },
 
     confirmGuess() {
-      if (this.gameStatus !== 'active') {
+      if (!this.gameActive) {
         return;
       }
 
@@ -266,7 +269,7 @@ export default {
       this.guessConfirmed = true;
 
       if (this.gameState.kilometersLeft <= 0) {
-        this.gameStatus = 'gameOver';
+        this.gameOver = true;
       }
     },
 
@@ -318,23 +321,13 @@ export default {
       let message = '';
       const score = this.gameState.citiesCorrectlyGuessed;
 
-      if (this.gameStatus === 'inactive') {
+      if (!this.gameActive) {
         message = `
           Can you find Europe's capital cities?<br>
           If your guess is more than 50km away, you'll lose points.<br>
           When your score hits 0, the game is over. Good luck!
         `;
-      }
-
-      if (this.gameStatus === 'active') {
-        message = `
-          Cities found: <span class="font-weight-bold">${this.gameState.citiesCorrectlyGuessed}</span><br>
-          Kilometers left: <span class="font-weight-bold">${this.gameState.kilometersLeft}</span><br>
-          Find <span class="font-weight-bold">${this.gameState.cityToGuess.name}!</span>
-        `
-      }
-
-      if (this.gameStatus === 'gameOver') {
+      } else if (this.gameOver) {
         message = `You found ${score} ${score === 1 ? 'city' : 'cities'  }, `
 
         switch (true) {
@@ -352,6 +345,12 @@ export default {
             message += 'nice work!'
           }
         }
+      } else {
+        message = `
+          Cities found: <span class="font-weight-bold">${this.gameState.citiesCorrectlyGuessed}</span><br>
+          Kilometers left: <span class="font-weight-bold">${this.gameState.kilometersLeft}</span><br>
+          Find <span class="font-weight-bold">${this.gameState.cityToGuess.name}!</span>
+        `
       }
 
       return message;
@@ -364,8 +363,8 @@ export default {
 
   computed: {
     headingText: function() {
-      if (this.gameStatus === 'gameOver') {
-        return 'Game over man!'
+      if (this.gameOver) {
+        return 'Game over!'
       } else {
         return 'Can you find the city?'
       }
